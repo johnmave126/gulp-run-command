@@ -22,7 +22,7 @@ export default function run (command = [], options = {}) {
     // Wrap it in a try/catch to ignore errors if ignoreErrors is set
     try {
       // Run the command and add the promise to the promise array
-      const promiseArray = [runCommand(cmd, quiet,ignoreErrors, pathResolve(cwd), env)]
+      const promiseArray = [runCommand(commands, quiet,ignoreErrors, pathResolve(cwd), env)]
       // If timeout is set, then add that as a timebomb to the promise array
       if (typeof timeout !== 'undefined') promiseArray.push(promiseTimeout(parseInt(timeout, 10), timedOutSymbol))
 
