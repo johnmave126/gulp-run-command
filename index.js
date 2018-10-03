@@ -46,7 +46,11 @@ export default function run (command = [], options = {}) {
 const runCommand = (command, quiet,ignoreErrors, cwd, env) => new Promise((resolve) => {
   // Run the command
   const proc = spawn(command.shift(), command, {
-    silent: quiet,
+    stdio: [
+      'ignore', // ignore stdin
+      (quiet ? 'pipe' : 'inherit'), // ignore or inherit stdout depending on quiet flag
+      (quiet ? 'pipe' : 'inherit')  // ignore or inherit stderr depending on quiet flag
+    ],
     cwd, // Set the current working directory
     env: {
       ...process.env, // Include the process's environment
