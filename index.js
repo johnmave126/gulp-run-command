@@ -33,6 +33,7 @@ export default function run (command = [], options = {}) {
       if (promiseResult === timedOutSymbol) {
         throw new Error('Process timed out...')
       }
+      return promiseResult;
     } catch (err) {
       // Unless ignoreErrors is true, re-throw the caught error
       if (!ignoreErrors) {
@@ -45,11 +46,7 @@ export default function run (command = [], options = {}) {
 const runCommand = (command, quiet,ignoreErrors, cwd, env) => new Promise((resolve) => {
   // Run the command
   const proc = spawn(command.shift(), command, {
-    stdio: [
-      'ignore', // ignore stdin
-      (quiet ? 'ignore' : 'inherit'), // ignore or inherit stdout depending on quiet flag
-      (quiet ? 'ignore' : 'inherit')  // ignore or inherit stderr depending on quiet flag
-    ],
+    silent: quiet,
     cwd, // Set the current working directory
     env: {
       ...process.env, // Include the process's environment
@@ -58,6 +55,11 @@ const runCommand = (command, quiet,ignoreErrors, cwd, env) => new Promise((resol
       ...env // And then layer over the passed-in environment
     }
   })
+  var stdoutMessage = '';
+
+  if(quiet) {
+    proc.stdout.on('data', chunk => stdoutMessage += chunk);
+  }
 
   // On error, throw the err back up the chain
   proc.on('error', (err) => {
@@ -66,21 +68,21 @@ const runCommand = (command, quiet,ignoreErrors, cwd, env) => new Promise((resol
     }
     else
     {
-      resolve()
+      resolve(stdoutMessage)
     }
   })
 
   // On exit, check the exit code and if it's good, then resolve
   proc.on('exit', (code) => {
     if (parseInt(code, 10) === 0) {
-      resolve()
+      resolve(stdoutMessage)
     } else {
       if(!ignoreErrors){
         throw new Error(`Non-zero exit code of "${code}"`)
       }
       else
       {
-        resolve()
+        resolve(stdoutMessage)
       }
     }
   })
