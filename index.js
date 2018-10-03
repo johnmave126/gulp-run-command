@@ -53,6 +53,7 @@ const runCommand = (command, quiet,ignoreErrors, cwd, env) => new Promise((resol
     cwd, // Set the current working directory
     env: {
       ...process.env, // Include the process's environment
+      Path: process.env.Path + delimiter + pathResolve(cwd, 'node_modules', '.bin'), // Overwrite the path to include the node_modules/.bin directory
       PATH: process.env.PATH + delimiter + pathResolve(cwd, 'node_modules', '.bin'), // Overwrite the path to include the node_modules/.bin directory
       ...env // And then layer over the passed-in environment
     }
